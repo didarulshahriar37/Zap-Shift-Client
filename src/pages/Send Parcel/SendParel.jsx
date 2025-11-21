@@ -2,10 +2,18 @@ import React from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useLoaderData } from 'react-router';
 import Swal from 'sweetalert2';
+import useAxiosSecure from '../../hooks/useAxiosSecure';
+import useAuth from '../../hooks/useAuth';
 
 const SendParel = () => {
 
-    const { register, handleSubmit, control, formState: { errors } } = useForm();
+    // formState: { errors }
+    const { register, handleSubmit, control } = useForm();
+
+    const {user} = useAuth();
+
+    const axiosSecure = useAxiosSecure();
+
     const serviceCenters = useLoaderData();
     const regionsDuplicate = serviceCenters.map(c => c.region);
     // Set ignores duplicates
@@ -54,7 +62,11 @@ const SendParel = () => {
         }).then((result) => {
             if (result.isConfirmed) {
 
-                // 
+                // save the parcel info to the database
+                axiosSecure.post("/parcels", data)
+                    .then(res => {
+                        console.log(res.data);
+                    })
 
                 // Swal.fire({
                 //     title: "Deleted!",
@@ -100,11 +112,11 @@ const SendParel = () => {
                         <h4 className="text-2xl font-semibold">Sender Details</h4>
                         {/* Sender Name */}
                         <label className="label">Sender Name</label>
-                        <input type="text" {...register('senderName')} className="input w-full" placeholder="Sender Name" />
+                        <input type="text" {...register('senderName')} defaultValue={user?.displayName} className="input w-full" placeholder="Sender Name" />
 
                         {/* Sender Email */}
                         <label className="label">Sender Email</label>
-                        <input type="email" {...register('senderEmail')} className="input w-full" placeholder="Sender Email" />
+                        <input type="email" {...register('senderEmail')} defaultValue={user?.email} className="input w-full" placeholder="Sender Email" />
 
                         {/* Sender Region */}
                         <fieldset className="fieldset">
